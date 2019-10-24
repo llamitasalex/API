@@ -1,15 +1,15 @@
 'use strict'
 
 const express = require('express')
-const loginCtrl = require('../controllers/login')
+const userCtrl = require('../controllers/user')
 const api = express.Router()
 
 
-api.get('/login', loginCtrl.getLogins)
-api.get('/login/:loginId', loginCtrl.getLogin )
-api.post('/login', loginCtrl.saveLogin)
-api.put('/login/:loginId', loginCtrl.updateLogin)
-api.delete('/login/:loginId', loginCtrl.deleteLogin)
+api.get('/user', userCtrl.getUsers)
+api.get('/user/:userId', userCtrl.getUser )
+api.post('/user', userCtrl.saveUser)
+api.put('/user/:userId', userCtrl.updateUser)
+api.delete('/user/:userId', userCtrl.deleteUser)
 
 
 module.exports = api
