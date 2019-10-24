@@ -1,16 +1,19 @@
+'use strict'
+
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema
 
 
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
-
-var LoginSchema = new Schema ({
-  name: {type: String},
-  surname: {type: String},
-  mail: {type: String},
+ const LoginSchema =  new Schema ({
+  name: String,
+  surname: String,
+  mail: {type: String, unique: true},
   phone: {type: String},
-  password: {type: String},
-  date: {type: Date}
+  password: {type: String,},
+  date: {type: Date, default: Date.now()}
  
-});
+})
 
-var Login = module.exports = mongoose.model('Login', LoginSchema);
+
+
+module.exports = mongoose.model('Login', LoginSchema);
