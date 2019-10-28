@@ -1,85 +1,121 @@
-'use strict'
+/* eslint-disable consistent-return */
 
-const User = require('../models/user')
+const crypto = require('crypto');
+const User = require('../models/user');
 
+function getUser(req, res) {
+  const { userId } = req.params;
 
-function getUser(req, res){
-    let userId = req.params.userId
+  User.findById(userId, (err, user) => {
+    if (err) return res.status(500).send({ message: 'error al realizar la peticion' });
+    if (!user) return res.status(404).send({ message: 'El usuario no existe' });
 
-    User.findById(userId, (err, user) => {
-        if (err) return res.status(500).send({message: `error al realizar la peticion: `})
-        if (!user) return res.status(404).send({message: `El usuario no existe: `})
-
-        res.status(200).send({ user })
-    })
-
+    res.status(200).send({ user });
+  });
 }
 
-function getUsers(req, res){
-    User.find({},(err,users)=>{
-        if (err) return res.status(500).send({message: `error al realizar la peticion`})
-        if (!users) return res.status(404).send({message: `No exiten usuarios` })
+function getUsers(req, res) {
+  User.find({}, (err, users) => {
+    if (err) return res.status(500).send({ message: 'error al realizar la peticion' });
+    if (!users) return res.status(404).send({ message: 'No exiten usuarios' });
 
-        res.send(200,{users})
-    })
-
+    res.status(200).send({ users });
+  });
+}
+function encriptar(user, pass) {
+  const hmac = crypto.createHmac('sha1', user).update(pass).digest('hex');
+  return hmac;
 }
 
-function saveUser (req,res){
-    console.log('POST /api/user')
-    console.log(req.body)
 
-    let user = new User()
-    user.name =req.body.name
-    user.surname =req.body.surname
-    user.mail =req.body.mail
-    user.phone =req.body.phone
-    user.password =req.body.password
-    user.date =req.body.date
+function createUser(req, res) {
+  const { mail } = req.body;
+  const { password } = req.body;
+  const passEncriptada = encriptar(mail, password);
 
-    user.save((err,userStored)=>{
-        if (err) res.status(500).send({message: `Error al salvar en la base de datos: ${err}`})
-   
-        res.status(200).send({user: userStored})
-    })
+  const user = new User(req.body, { mail, password: passEncriptada });
 
+  user.save((err, newUser) => {
+    if (err) return res.status(400).send({ message: 'error guardando el usuario', err });
 
+    return res.status(200).send({ message: 'Saved user', newUser });
+  });
 }
 
-function updateUser(req,res){
-    let userId = req.params.userId
-    let update = req.body
+function replaceUser(req, res) {
+  const { userId } = req.params;
+  const { mail } = req.body;
+  const { password } = req.body;
+  const { name } = req.body;
+  const { surname } = req.body;
 
-    User.findByIdAndUpdate(userId, update, (err, userUpdated)=>{
-        if (err) res.status(500).send({message:`Error al actualizar el usuario: ${err}`})
-    
+  if (!mail || !name || !surname || !password) {
+    return res.status(400).send({ message: 'faltan datos' });
+  }
 
-    res.status(200).send({user:userUpdated})
-})
+  const userReplacement = req.body;
 
+  User.findById(userId, (err, user) => {
+    if (err) return res.status(404).send({ message: 'No user to replace found', err });
+
+    // Replaces the user
+    user.replaceOne(userReplacement, (error) => {
+      if (error) return res.status(500).send({ error });
+
+      return res.status(200).send({ message: 'User replaced' });
+    });
+  });
 }
 
-function deleteUser(req,res){
-    let userId = req.params.userId
 
-    User.findById(userId, (err, user)=>{
-        if (err) res.status(500).send({message:`Error al borrar el usuario: ${err}`})
+function updateUser(req, res) {
+  const { userId } = req.params;
+  const update = req.body;
 
-        user.remove(err =>{
-            if (err) res.status(500).send({message:`Error al borrar el usuario: ${err}`})
-            
-            res.status(200).send({message: "el usuario ha sido borrado"} )
-        })
+  User.findByIdAndUpdate(userId, update, (err, userUpdated) => {
+    if (err) res.status(500).send({ message: `Error al actualizar el usuario: ${err}` });
 
-    }) 
 
+    res.status(200).send({ message: 'usuario actualizado', user: userUpdated });
+  });
 }
 
-module.exports={
-    getUser,
-    getUsers,
-    saveUser,
-    updateUser,
-    deleteUser
+function deleteUser(req, res) {
+  const { userId } = req.params;
 
+  User.findById(userId, (err, user) => {
+    if (err) res.status(500).send({ message: `Error al borrar el usuario: ${err}` });
+    if (!user) return res.status(404).send({ message: 'usuario no encontardo' });
+
+    return res.status(200).send({ message: 'Usuario borrado', user });
+  });
 }
+
+
+function login(req, res) {
+  const { mail } = req.params;
+  const { password } = req.body;
+
+  const passEncriptada = encriptar(mail, password);
+
+  User.findOne({ mail }, (err, user) => {
+    if (err) return res.status(500).send({ err });
+    if (!user) return res.status(404).send({ message: 'No existe usuario' });
+
+    if (user) {
+      if (user.password === passEncriptada) res.send({ message: 'login completado' });
+      else res.send({ message: 'contraseña incorrecta', err });
+    }
+  });
+}
+
+
+module.exports = {
+  getUsers,
+  getUser,
+  createUser,
+  replaceUser,
+  updateUser,
+  deleteUser,
+  login,
+};
