@@ -1,6 +1,4 @@
 /* eslint-disable consistent-return */
-
-const crypto = require('crypto');
 const User = require('../models/user');
 
 function getUser(req, res) {
@@ -22,20 +20,9 @@ function getUsers(req, res) {
     res.status(200).send({ users });
   });
 }
-function encriptar(user, pass) {
-  const hmac = crypto.createHmac('sha1', user).update(pass).digest('hex');
-  return hmac;
-}
-
 
 function createUser(req, res) {
-  const { mail } = req.body;
-  const { password } = req.body;
-  const passEncriptada = encriptar(mail, password);
-
-  const user = new User(req.body, { mail, password: passEncriptada });
-
-  user.save((err, newUser) => {
+  User.save((err, newUser) => {
     if (err) return res.status(400).send({ message: 'error guardando el usuario', err });
 
     return res.status(200).send({ message: 'Saved user', newUser });
@@ -73,10 +60,10 @@ function updateUser(req, res) {
   const update = req.body;
 
   User.findByIdAndUpdate(userId, update, (err, userUpdated) => {
-    if (err) res.status(500).send({ message: `Error al actualizar el usuario: ${err}` });
+    if (err) return res.status(500).send({ message: `Error al actualizar el usuario: ${err}` });
 
 
-    res.status(200).send({ message: 'usuario actualizado', user: userUpdated });
+    return res.status(200).send({ message: 'usuario actualizado', user: userUpdated });
   });
 }
 
@@ -84,7 +71,7 @@ function deleteUser(req, res) {
   const { userId } = req.params;
 
   User.findById(userId, (err, user) => {
-    if (err) res.status(500).send({ message: `Error al borrar el usuario: ${err}` });
+    if (err) return res.status(500).send({ message: `Error al borrar el usuario: ${err}` });
     if (!user) return res.status(404).send({ message: 'usuario no encontardo' });
 
     return res.status(200).send({ message: 'Usuario borrado', user });
@@ -93,19 +80,15 @@ function deleteUser(req, res) {
 
 
 function login(req, res) {
-  const { mail } = req.params;
   const { password } = req.body;
-
-  const passEncriptada = encriptar(mail, password);
+  const { mail } = req.params;
 
   User.findOne({ mail }, (err, user) => {
     if (err) return res.status(500).send({ err });
     if (!user) return res.status(404).send({ message: 'No existe usuario' });
 
-    if (user) {
-      if (user.password === passEncriptada) res.send({ message: 'login completado' });
-      else res.send({ message: 'contraseña incorrecta', err });
-    }
+    if (password === user.password) return res.status(200).send({ message: 'login completado' });
+    return res.status(401).send({ message: 'contraseña incorrecta' });
   });
 }
 
