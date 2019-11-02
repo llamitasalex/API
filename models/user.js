@@ -1,5 +1,9 @@
+/* eslint-disable func-names */
+/* eslint-disable consistent-return */
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 
+const saltRounds = 10;
 const { Schema } = mongoose;
 
 const UserSchema = new Schema({
@@ -10,5 +14,23 @@ const UserSchema = new Schema({
   password: { type: String, required: true },
   date: { type: Date, default: Date.now() },
 });
+
+UserSchema.pre('save', function (next) {
+  const user = this;
+
+  bcrypt.hash(user.password, saltRounds, (err, hash) => {
+    if (err) return next(err);
+    user.password = hash;
+    next();
+  });
+});
+
+UserSchema.methods.comparePassword = function (password, cb) {
+  const user = this;
+  bcrypt.compare(password, user.password, (err, isMatch) => {
+    if (err) return cb(err);
+    cb(isMatch);
+  });
+};
 
 module.exports = mongoose.model('User', UserSchema);

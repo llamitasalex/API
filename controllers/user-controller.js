@@ -1,5 +1,9 @@
+/* eslint-disable no-console */
 /* eslint-disable consistent-return */
+// const Token = require('../middleware/middleware');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const configtk = require('../configtk/configtk');
 
 function getUser(req, res) {
   const { userId } = req.params;
@@ -8,7 +12,7 @@ function getUser(req, res) {
     if (err) return res.status(500).send({ message: 'error al realizar la peticion' });
     if (!user) return res.status(404).send({ message: 'El usuario no existe' });
 
-    res.status(200).send({ user });
+    return res.status(200).send({ user });
   });
 }
 
@@ -17,12 +21,14 @@ function getUsers(req, res) {
     if (err) return res.status(500).send({ message: 'error al realizar la peticion' });
     if (!users) return res.status(404).send({ message: 'No exiten usuarios' });
 
-    res.status(200).send({ users });
+    return res.status(200).send({ users });
   });
 }
 
 function createUser(req, res) {
-  User.save((err, newUser) => {
+  const user = new User(req.body);
+
+  user.save((err, newUser) => {
     if (err) return res.status(400).send({ message: 'error guardando el usuario', err });
 
     return res.status(200).send({ message: 'Saved user', newUser });
@@ -45,7 +51,6 @@ function replaceUser(req, res) {
   User.findById(userId, (err, user) => {
     if (err) return res.status(404).send({ message: 'No user to replace found', err });
 
-    // Replaces the user
     user.replaceOne(userReplacement, (error) => {
       if (error) return res.status(500).send({ error });
 
@@ -53,7 +58,6 @@ function replaceUser(req, res) {
     });
   });
 }
-
 
 function updateUser(req, res) {
   const { userId } = req.params;
@@ -70,7 +74,7 @@ function updateUser(req, res) {
 function deleteUser(req, res) {
   const { userId } = req.params;
 
-  User.findById(userId, (err, user) => {
+  User.findByIdAndDelete(userId, (err, user) => {
     if (err) return res.status(500).send({ message: `Error al borrar el usuario: ${err}` });
     if (!user) return res.status(404).send({ message: 'usuario no encontardo' });
 
@@ -78,20 +82,26 @@ function deleteUser(req, res) {
   });
 }
 
-
 function login(req, res) {
   const { password } = req.body;
   const { mail } = req.params;
+  // const token = Token.encrypttk;
 
   User.findOne({ mail }, (err, user) => {
     if (err) return res.status(500).send({ err });
     if (!user) return res.status(404).send({ message: 'No existe usuario' });
 
-    if (password === user.password) return res.status(200).send({ message: 'login completado' });
-    return res.status(401).send({ message: 'contraseña incorrecta' });
+    user.comparePassword(password, (isMatch) => {
+      if (err) throw err;
+      if (isMatch) {
+        const payload = { email: mail };
+        const token = jwt.sign(payload, configtk.clave, { expiresIn: 1440 });
+        return res.status(200).send({ token, message: 'contarseña correcta' });
+      }
+      return res.status(404).send({ message: 'login incorrecto' });
+    });
   });
 }
-
 
 module.exports = {
   getUsers,
