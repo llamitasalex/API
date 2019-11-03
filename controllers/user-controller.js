@@ -1,9 +1,6 @@
 /* eslint-disable no-console */
 /* eslint-disable consistent-return */
-// const Token = require('../middleware/middleware');
-const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const configtk = require('../configtk/configtk');
 
 function getUser(req, res) {
   const { userId } = req.params;
@@ -82,27 +79,6 @@ function deleteUser(req, res) {
   });
 }
 
-function login(req, res) {
-  const { password } = req.body;
-  const { mail } = req.params;
-  // const token = Token.encrypttk;
-
-  User.findOne({ mail }, (err, user) => {
-    if (err) return res.status(500).send({ err });
-    if (!user) return res.status(404).send({ message: 'No existe usuario' });
-
-    user.comparePassword(password, (isMatch) => {
-      if (err) throw err;
-      if (isMatch) {
-        const payload = { email: mail };
-        const token = jwt.sign(payload, configtk.clave, { expiresIn: 1440 });
-        return res.status(200).send({ token, message: 'contarseña correcta' });
-      }
-      return res.status(404).send({ message: 'login incorrecto' });
-    });
-  });
-}
-
 module.exports = {
   getUsers,
   getUser,
@@ -110,5 +86,4 @@ module.exports = {
   replaceUser,
   updateUser,
   deleteUser,
-  login,
 };
