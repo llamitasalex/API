@@ -10,14 +10,14 @@ function createTk(req, res, mail) {
 }
 
 
-function verifyTk(req, res) {
-  const token = req.headers['x-access-token'];
+function verifyTk(req, res, next) {
+  const token = req.headers['token-access'];
   if (!token) return res.status(401).send({ auth: false, message: 'No existe autorizacion' });
 
-  jwt.verify(token, configtk.clave, (err, decoded) => {
-    if (err) return res.status(500).send({ auth: false, message: 'Fallo al autenticar' });
-
-    res.status(200).send(decoded);
+  jwt.verify(token, configtk.clave, (err/* , decoded */) => {
+    if (err) return res.status(500).send({ auth: false, message: 'no tiene autorizacion' });
+    // res.status(200).send(decoded);
+    next();
   });
 }
 

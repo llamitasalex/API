@@ -12,6 +12,8 @@ userRoutes.post('/:mail', Log.login);
 userRoutes.put('/:userId', userCtrl.replaceUser);
 userRoutes.patch('/:userId', userCtrl.updateUser);
 userRoutes.delete('/:userId', userCtrl.deleteUser);
-userRoutes.get('/me/token', auth.verifyTk);
+userRoutes.get('/me/token', auth.verifyTk, (req, res) => {
+  res.status(200).send({ message: 'acceso permitido' });
+});
 
 module.exports = userRoutes;
