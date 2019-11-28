@@ -89,6 +89,8 @@ function getBookTitle(req, res) {
   const { title } = req.params;
 
   Book.findOne({ title }, (err, book) => {
+    console.log(title);
+    console.log(book);
     if (err) return res.status(500).send({ message: 'error', err });
     if (!book) return res.status(404).send({ message: 'No se ha encontrado el libro' });
 

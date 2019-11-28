@@ -8,7 +8,7 @@ const BookSchema = new Schema({
   author: { type: String, required: true },
   price: { type: String, required: true },
   publisher: { type: String, required: true },
-  date: { type: Date, required: true },
+  date: { type: String, required: true },
   description: { type: String, required: true },
 });
 

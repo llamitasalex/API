@@ -1,6 +1,6 @@
 const express = require('express');
 const bookCtrl = require('../controllers/book-controller');
-const auth = require('../middleware/auth');
+// const auth = require('../middleware/auth');
 
 const bookRoutes = express.Router();
 
@@ -10,7 +10,7 @@ bookRoutes.post('/', bookCtrl.createBook);
 bookRoutes.put('/:bookId', bookCtrl.replaceBook);
 bookRoutes.patch('/:bookId', bookCtrl.updateBook);
 bookRoutes.delete('/:bookId', bookCtrl.deleteBook);
-bookRoutes.get('/title/:title', auth.verifyTk, bookCtrl.getBookTitle);
+bookRoutes.get('/title/:title', bookCtrl.getBookTitle);
 bookRoutes.get('/ISBN/:ISBN', bookCtrl.getBookISBN);
 bookRoutes.get('/author/:author', bookCtrl.getBookAuthor);
 bookRoutes.get('/price/:price', bookCtrl.getBookPrice);
