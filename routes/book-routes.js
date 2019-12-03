@@ -15,5 +15,6 @@ bookRoutes.get('/ISBN/:ISBN', bookCtrl.getBookISBN);
 bookRoutes.get('/author/:author', bookCtrl.getBookAuthor);
 bookRoutes.get('/price/:price', bookCtrl.getBookPrice);
 bookRoutes.get('/date/:date', bookCtrl.getBookDate);
+bookRoutes.get('/title1/query/:title', bookCtrl.BookTitle);
 
 module.exports = bookRoutes;

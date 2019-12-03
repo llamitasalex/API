@@ -84,13 +84,21 @@ function deleteBook(req, res) {
     return res.status(200).send({ message: 'libro borrado', book });
   });
 }
+function BookTitle(req, res) {
+  const title = { title: { $regex: req.params.title } };
+
+  Book.find(title, (err, book) => {
+    if (err) return res.status(500).send({ message: 'error', err });
+    if (!book) return res.status(404).send({ message: 'No se ha encontrado el libro' });
+
+    return res.status(200).send({ message: 'libro encontrado', book });
+  });
+}
 
 function getBookTitle(req, res) {
-  const { title } = req.params;
+  const title = { title: { $regex: req.params.title } };
 
-  Book.findOne({ title }, (err, book) => {
-    console.log(title);
-    console.log(book);
+  Book.find(title, (err, book) => {
     if (err) return res.status(500).send({ message: 'error', err });
     if (!book) return res.status(404).send({ message: 'No se ha encontrado el libro' });
 
@@ -99,9 +107,9 @@ function getBookTitle(req, res) {
 }
 
 function getBookISBN(req, res) {
-  const { ISBN } = req.params;
+  const ISBN = { ISBN: { $regex: req.params.ISBN } };
 
-  Book.findOne({ ISBN }, (err, book) => {
+  Book.find(ISBN, (err, book) => {
     if (err) return res.status(500).send({ message: 'error', err });
     if (!book) return res.status(404).send({ message: 'No se ha encontrado el libro' });
 
@@ -110,9 +118,9 @@ function getBookISBN(req, res) {
 }
 
 function getBookAuthor(req, res) {
-  const { author } = req.params;
+  const author = { author: { $regex: req.params.author } };
 
-  Book.findOne({ author }, (err, book) => {
+  Book.find(author, (err, book) => {
     if (err) return res.status(500).send({ message: 'error', err });
     if (!book) return res.status(404).send({ message: 'No se ha encontrado el libro' });
 
@@ -121,9 +129,9 @@ function getBookAuthor(req, res) {
 }
 
 function getBookPrice(req, res) {
-  const { price } = req.params;
+  const price = { price: { $regex: req.params.price } };
 
-  Book.findOne({ price }, (err, book) => {
+  Book.find(price, (err, book) => {
     if (err) return res.status(500).send({ message: 'error', err });
     if (!book) return res.status(404).send({ message: 'No se ha encontrado el libro' });
 
@@ -132,9 +140,9 @@ function getBookPrice(req, res) {
 }
 
 function getBookDate(req, res) {
-  const { date } = req.params;
+  const date = { date: { $regex: req.params.date } };
 
-  Book.findOne({ date }, (err, book) => {
+  Book.find(date, (err, book) => {
     if (err) return res.status(500).send({ message: 'error', err });
     if (!book) return res.status(404).send({ message: 'No se ha encontrado el libro' });
 
@@ -154,4 +162,5 @@ module.exports = {
   getBookAuthor,
   getBookPrice,
   getBookDate,
+  BookTitle,
 };

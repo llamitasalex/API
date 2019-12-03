@@ -11,6 +11,16 @@ function getUser(req, res) {
     return res.status(200).send({ user });
   });
 }
+function getUserInfo(req, res) {
+  const { mail } = req.params;
+
+  User.findOne({ mail }, (err, user) => {
+    if (err) return res.status(500).send({ message: 'error al realizar la peticion' });
+    if (!user) return res.status(404).send({ message: 'El usuario no existe' });
+
+    return res.status(200).send({ user });
+  });
+}
 
 function getUsers(req, res) {
   User.find({}, (err, users) => {
@@ -81,6 +91,7 @@ function deleteUser(req, res) {
 module.exports = {
   getUsers,
   getUser,
+  getUserInfo,
   createUser,
   replaceUser,
   updateUser,
