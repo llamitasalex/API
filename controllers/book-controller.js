@@ -6,7 +6,7 @@ const Book = require('../models/book');
 function getBooks(req, res) {
   Book.find({}, (err, books) => {
     if (err) return res.status(500).send({ message: 'error al realizar la peticion' });
-    if (!books) return res.status(404).send({ message: 'No exiten libros' });
+    if (books.length === 0) return res.status(404).send({ message: 'No exiten libros' });
 
     res.status(200).send({ books });
   });
@@ -84,23 +84,32 @@ function deleteBook(req, res) {
     return res.status(200).send({ message: 'libro borrado', book });
   });
 }
-function BookTitle(req, res) {
-  const title = { title: { $regex: req.params.title } };
 
-  Book.find(title, (err, book) => {
+function SearchBook(req, res) {
+  const par = { $regex: req.params.par };
+  Book.find({
+    $or: [
+      { title: par },
+      { ISBN: par },
+      { author: par },
+      { price: par },
+      { date: par },
+    ],
+  }, (err, book) => {
     if (err) return res.status(500).send({ message: 'error', err });
-    if (!book) return res.status(404).send({ message: 'No se ha encontrado el libro' });
+    if (book.length === 0) return res.status(404).send({ message: 'No se ha encontrado el libro' });
 
     return res.status(200).send({ message: 'libro encontrado', book });
   });
 }
+
 
 function getBookTitle(req, res) {
   const title = { title: { $regex: req.params.title } };
 
   Book.find(title, (err, book) => {
     if (err) return res.status(500).send({ message: 'error', err });
-    if (!book) return res.status(404).send({ message: 'No se ha encontrado el libro' });
+    if (book.length === 0) return res.status(404).send({ message: 'No se ha encontrado el libro' });
 
     return res.status(200).send({ message: 'libro encontrado', book });
   });
@@ -111,7 +120,7 @@ function getBookISBN(req, res) {
 
   Book.find(ISBN, (err, book) => {
     if (err) return res.status(500).send({ message: 'error', err });
-    if (!book) return res.status(404).send({ message: 'No se ha encontrado el libro' });
+    if (book.length === 0) return res.status(404).send({ message: 'No se ha encontrado el libro' });
 
     return res.status(200).send({ message: 'libro encontrado', book });
   });
@@ -122,7 +131,7 @@ function getBookAuthor(req, res) {
 
   Book.find(author, (err, book) => {
     if (err) return res.status(500).send({ message: 'error', err });
-    if (!book) return res.status(404).send({ message: 'No se ha encontrado el libro' });
+    if (book.length === 0) return res.status(404).send({ message: 'No se ha encontrado el libro' });
 
     return res.status(200).send({ message: 'libro encontrado', book });
   });
@@ -133,7 +142,7 @@ function getBookPrice(req, res) {
 
   Book.find(price, (err, book) => {
     if (err) return res.status(500).send({ message: 'error', err });
-    if (!book) return res.status(404).send({ message: 'No se ha encontrado el libro' });
+    if (book.length === 0) return res.status(404).send({ message: 'No se ha encontrado el libro' });
 
     return res.status(200).send({ message: 'libro encontrado', book });
   });
@@ -144,7 +153,7 @@ function getBookDate(req, res) {
 
   Book.find(date, (err, book) => {
     if (err) return res.status(500).send({ message: 'error', err });
-    if (!book) return res.status(404).send({ message: 'No se ha encontrado el libro' });
+    if (book.length === 0) return res.status(404).send({ message: 'No se ha encontrado el libro' });
 
     return res.status(200).send({ message: 'libro encontrado', book });
   });
@@ -157,10 +166,10 @@ module.exports = {
   replaceBook,
   updateBook,
   deleteBook,
+  SearchBook,
   getBookTitle,
   getBookISBN,
   getBookAuthor,
   getBookPrice,
   getBookDate,
-  BookTitle,
 };
